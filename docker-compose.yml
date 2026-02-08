@@ -1,0 +1,36 @@
+
+services:
+  # PostgreSQL Database
+  db:
+    image: postgres:15-alpine
+    container_name: seashell-db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-seashell_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-seashell_password}
+      POSTGRES_DB: ${POSTGRES_DB:-seashell_db}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-seashell_user}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Seashell API
+  api:
+    build: .
+    container_name: seashell-api
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-seashell_user}:${POSTGRES_PASSWORD:-seashell_password}@db:5432/${POSTGRES_DB:-seashell_db}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
