@@ -1,8 +1,11 @@
-from sqlmodel import Session, select
+from sqlmodel import Session, select, col
 from typing import List, Optional
 from fastapi import HTTPException
 from app.models.seashell import Seashell
 from app.schemas.seashell import SeashellCreate, SeashellUpdate
+from app.core.logging_config import get_logger
+
+logger = get_logger(__name__)
 
 
 class SeashellService:
@@ -11,11 +14,18 @@ class SeashellService:
     @staticmethod
     def create_seashell(seashell_data: SeashellCreate, session: Session) -> Seashell:
         """Create a new seashell"""
-        db_seashell = Seashell.model_validate(seashell_data)
-        session.add(db_seashell)
-        session.commit()
-        session.refresh(db_seashell)
-        return db_seashell
+        logger.info(f"Creating new seashell: {seashell_data.name}")
+        try:
+            db_seashell = Seashell.model_validate(seashell_data)
+            session.add(db_seashell)
+            session.commit()
+            session.refresh(db_seashell)
+            logger.info(f"Successfully created seashell with ID: {db_seashell.id}")
+            return db_seashell
+        except Exception as e:
+            logger.error(f"Failed to create seashell: {str(e)}", exc_info=True)
+            session.rollback()
+            raise
     
     @staticmethod
     def get_seashells(
@@ -49,20 +59,24 @@ class SeashellService:
         # Apply pagination
         statement = statement.offset(skip).limit(limit)
         
-        seashells = session.exec(statement).all()
-        return seashells
+        results = session.exec(statement).all()
+        logger.debug(f"Retrieved {len(results)} seashells (page {skip // limit + 1})")
+        return results
     
     @staticmethod
     def get_seashell_by_id(seashell_id: int, session: Session) -> Seashell:
-        """Get a seashell by ID, raise 404 if not found or deleted"""
+        """Get a single seashell by ID"""
+        logger.debug(f"Fetching seashell with ID: {seashell_id}")
         seashell = session.get(Seashell, seashell_id)
         if not seashell or seashell.deleted:
+            logger.warning(f"Seashell not found: ID {seashell_id}")
             raise HTTPException(status_code=404, detail="Seashell not found")
         return seashell
     
     @staticmethod
     def update_seashell(seashell_id: int, seashell_update: SeashellUpdate, session: Session) -> Seashell:
         """Update a seashell by ID"""
+        logger.info(f"Updating seashell ID: {seashell_id}")
         seashell = SeashellService.get_seashell_by_id(seashell_id, session)
         
         # Update only fields that were provided
@@ -73,12 +87,15 @@ class SeashellService:
         session.add(seashell)
         session.commit()
         session.refresh(seashell)
+        logger.info(f"Successfully updated seashell ID: {seashell_id}")
         return seashell
     
     @staticmethod
     def delete_seashell(seashell_id: int, session: Session) -> None:
         """Soft delete a seashell by ID"""
+        logger.info(f"Deleting seashell ID: {seashell_id}")
         seashell = SeashellService.get_seashell_by_id(seashell_id, session)
         seashell.deleted = True
         session.add(seashell)
         session.commit()
+        logger.info(f"Successfully deleted seashell ID: {seashell_id}")
