@@ -11,7 +11,7 @@ class SeashellService:
     @staticmethod
     def create_seashell(seashell_data: SeashellCreate, session: Session) -> Seashell:
         """Create a new seashell"""
-        db_seashell = Seashell.from_orm(seashell_data)
+        db_seashell = Seashell.model_validate(seashell_data)
         session.add(db_seashell)
         session.commit()
         session.refresh(db_seashell)
@@ -66,7 +66,7 @@ class SeashellService:
         seashell = SeashellService.get_seashell_by_id(seashell_id, session)
         
         # Update only fields that were provided
-        update_data = seashell_update.dict(exclude_unset=True)
+        update_data = seashell_update.model_dump(exclude_unset=True)
         for key, value in update_data.items():
             setattr(seashell, key, value)
         
