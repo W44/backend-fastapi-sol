@@ -10,6 +10,6 @@ class SeashellRead(SeashellCreate):
     id: int
 
 class SeashellUpdate(BaseModel):
-    name: Optional[str]
-    species: Optional[str]
-    description: Optional[str]
+    name: Optional[str] = None
+    species: Optional[str] = None
+    description: Optional[str] = None

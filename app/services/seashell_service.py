@@ -32,11 +32,11 @@ class SeashellService:
         
         # Apply global search across name, species, and description
         if search:
-            search_filter = f"%{search.lower()}%"
+            search_filter = f"%{search}%"
             statement = statement.where(
-                (Seashell.name.lower().ilike(search_filter)) |
-                (Seashell.species.lower().ilike(search_filter)) |
-                (Seashell.description.lower().ilike(search_filter))
+                (Seashell.name.ilike(search_filter)) |
+                (Seashell.species.ilike(search_filter)) |
+                (Seashell.description.ilike(search_filter))
             )
         
         # Apply sorting
