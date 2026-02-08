@@ -1,6 +1,16 @@
 from fastapi.testclient import TestClient
 
 
+def test_health_check(client: TestClient):
+    """
+    Checks if the health endpoint is working.
+    This is used by monitoring systems to verify the API is up.
+    """
+    response = client.get("/health")
+    assert response.status_code == 200
+    assert response.json() == {"status": "ok"}
+
+
 def test_create_seashell_success(client: TestClient):
     """
     Checks if we can add a new seashell to the collection.

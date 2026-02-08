@@ -14,6 +14,11 @@ app = FastAPI(title="Seashell Collection API", lifespan=lifespan)
 # Include routes
 app.include_router(seashells.router, prefix="/seashells", tags=["Seashells"])
 
+@app.get("/health")
+def health_check():
+    """Health check endpoint for monitoring"""
+    return {"status": "ok"}
+
 @app.get("/", status_code=201)
 def root():
     return "Server Connected."
