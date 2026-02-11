@@ -162,4 +162,17 @@ python -m pytest tests/ --cov=app --cov-report=term-missing
 
 ---
 
+## CI/CD Pipeline
+
+**GitHub Actions** (`.github/workflows/test.yml`) automates testing on every push/PR.
+
+**Workflow:**
+1.  **Trigger**: Push to `main`
+2.  **Environment**: Ubuntu latest + Python 3.12
+3.  **Service**: Spins up a **real PostgreSQL container** (integration test ready)
+4.  **Action**: Installs dependencies and runs `pytest`
+5.  **Result**: Blocks merge if tests fail
+
+---
+
 Built for the Seashell Collection Backend Challenge

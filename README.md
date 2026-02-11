@@ -2,6 +2,8 @@
 
 A RESTful backend service for managing seashell collections with persistent storage.
 
+![CI Status](https://github.com/W44/backend-fastapi-sol/actions/workflows/test.yml/badge.svg)
+
 **Features:**
 - CRUD operations for seashell records
 - Pagination, search, and sorting
