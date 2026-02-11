@@ -168,7 +168,8 @@ python -m pytest tests/ --cov=app --cov-report=term-missing
 
 **Workflow:**
 1.  **Trigger**: Push to `main`
-2.  **Environment**: Ubuntu latest + Python 3.12
+2.  **Linting**: Enforces strict code style with **Ruff** (fails on unused imports, bad formatting)
+3.  **Environment**: Ubuntu latest + Python 3.12
 3.  **Service**: Spins up a **real PostgreSQL container** (integration test ready)
 4.  **Action**: Installs dependencies and runs `pytest`
 5.  **Result**: Blocks merge if tests fail

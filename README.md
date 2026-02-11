@@ -10,7 +10,8 @@ A RESTful backend service for managing seashell collections with persistent stor
 - PostgreSQL database persistence
 - Auto-generated API documentation (Swagger UI)
 - Soft delete pattern
-- **Cloud-ready**: Multi-stage builds, health checks, stateless design
+- **Production-Ready**: Multi-stage Docker builds, PostgreSQL persistence
+- **Code Quality**: Automated Linting (Ruff) in CI pipeliness design
 
 ---
 
