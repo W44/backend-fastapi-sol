@@ -8,6 +8,7 @@ A RESTful backend service for managing seashell collections with persistent stor
 - PostgreSQL database persistence
 - Auto-generated API documentation (Swagger UI)
 - Soft delete pattern
+- **Cloud-ready**: Multi-stage builds, health checks, stateless design
 
 ---
 
@@ -150,12 +151,15 @@ docker-compose up -d
 Populate database with sample records:
 
 ```bash
-# Run with default credentials
+# Run with default credentials (default: seashell_user/seashell_password)
 python utils/seed_data.py
 
-# Optional: Run with custom credentials
+# Run with custom credentials (MUST match docker-compose credentials above)
 python utils/seed_data.py --username myuser --password mypass
 ```
+
+> [!IMPORTANT]
+> The seed script credentials **must match** the database credentials used in `docker-compose up`. If you used custom credentials when creating the database, use the same credentials here.
 
 ### Manage Container
 

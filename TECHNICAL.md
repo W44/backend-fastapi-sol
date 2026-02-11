@@ -94,6 +94,24 @@ Response: {"status": "ok"}
 
 ---
 
+## Docker Build Strategy
+
+I used a **multi-stage build** (Stage 1: Validation, Stage 2: Runtime).
+
+**Decision:**
+Run tests during image build to enforce a strict quality gate. If tests fail, no image is created.
+
+**Benefits:**
+1.  **Zero Broken Code**: Prevents deploying failing code.
+2.  **CI/CD Standard**: Automates validation on every build.
+
+```bash
+# Manual verification
+docker-compose run --rm api pytest tests/ -v
+```
+
+---
+
 ## Docker Deployment
 
 ### Build & Push
