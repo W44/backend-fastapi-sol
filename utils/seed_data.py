@@ -22,9 +22,9 @@ args = parser.parse_args()
 os.environ["DATABASE_URL"] = f"postgresql://{args.username}:{args.password}@localhost:5432/seashell_db"
 
 
-from sqlmodel import Session, select 
-from app.db.session import engine, init_db 
-from app.models.seashell import Seashell 
+from sqlmodel import Session, select  # noqa: E402
+from app.db.session import engine, init_db  # noqa: E402
+from app.models.seashell import Seashell  # noqa: E402 
 
 
 # Sample seashell data
