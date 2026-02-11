@@ -1,5 +1,4 @@
 from sqlmodel import Session, SQLModel, create_engine
-from sqlalchemy.orm import sessionmaker
 import os
 from dotenv import load_dotenv
 
@@ -21,5 +20,4 @@ def get_session():
         yield session
 
 def init_db():
-    from app.models.seashell import Seashell
     SQLModel.metadata.create_all(engine)

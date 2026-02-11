@@ -1,4 +1,4 @@
-from sqlmodel import Session, select, col
+from sqlmodel import Session, select
 from typing import List, Optional
 from fastapi import HTTPException
 from app.models.seashell import Seashell
@@ -38,7 +38,7 @@ class SeashellService:
     ) -> List[Seashell]:
         """Get all non-deleted seashells with pagination, search, and sorting"""
         # Base query - only non-deleted items
-        statement = select(Seashell).where(Seashell.deleted == False)
+        statement = select(Seashell).where(Seashell.deleted.is_(False))
         
         # Apply global search across name, species, and description
         if search:

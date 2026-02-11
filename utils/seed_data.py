@@ -21,9 +21,10 @@ args = parser.parse_args()
 # Override DATABASE_URL to use local Docker database
 os.environ["DATABASE_URL"] = f"postgresql://{args.username}:{args.password}@localhost:5432/seashell_db"
 
-from sqlmodel import Session, select
-from app.db.session import engine, init_db
-from app.models.seashell import Seashell
+
+from sqlmodel import Session, select 
+from app.db.session import engine, init_db 
+from app.models.seashell import Seashell 
 
 
 # Sample seashell data
