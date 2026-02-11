@@ -1,63 +1,89 @@
 # Technical Documentation
 
-Backend implementation details, architecture, and deployment guide for the Seashell Collection API.
+![Architecture Concept](arch-diagram.jpeg)
+
+*High-level architecture concept showing the flow from request to persistence.*
 
 ---
 
-## Technologies Used
+## System Design & Decisions
 
-| Component | Technology | Purpose |
-|-----------|-----------|---------|
-| **Framework** | FastAPI | Modern, fast API framework |
-| **Database** | PostgreSQL | Production-grade SQL database |
-| **ORM** | SQLModel | Type-safe database models |
-| **Validation** | Pydantic | Request/response validation |
-| **Server** | Uvicorn | ASGI web server |
-| **Migrations** | Alembic | Database schema versioning |
-| **Testing** | Pytest | Unit and integration tests |
-| **Container** | Docker | Containerization |
+This architecture wasn't just "thrown together"; every layer exists to solve a specific problem. Here is the thought process behind the design:
+
+### 1. **The "Three-Layer" Cake (Application → Service → Model)**
+**Decision:** I separated the code into three distinct layers.
+*   **Why?** If we put everything in one file, it becomes a nightmare to test or change later.
+*   **How it works:**
+    *   **Application Layer**: Handles the HTTP "doors". It validates what comes in (JSON) but knows *nothing* about business rules.
+    *   **Service Layer**: The "brain". This is where logic lives (e.g., "You can't delete a seashell if it's already deleted"). It doesn't care about HTTP status codes.
+    *   **Model Layer**: The "vault". It strictly defines what our data looks like in the database.
+
+### 2. **Docker Containers (Isolation)**
+**Decision:** I placed the API and the Database in separate containers.
+*   **Why?**
+    *   **Independence**: I can upgrade the API (Python) without touching the Database (PostgreSQL).
+    *   **Safety**: If the API crashes, the Database stays alive.
+    *   **Scalability**: In the future, I could run 5 API containers talking to 1 Database.
+
+### 3. **The "Middleware" Guard**
+**Decision:** I added a custom Middleware layer that sits before the Application Layer.
+*   **Why?** We need to know *what* is happening.
+*   **Benefit**: Every single request is logged with its duration. If the API feels slow, I check the logs and see "POST /seashells took 2.5s" immediately.
+
+### 4. **Flexible Database Strategy (Environment Driven)**
+**Decision:** The system connects to the database purely via the `DATABASE_URL` environment variable.
+*   **Why?** This decouples the code from the infrastructure, allowing it to run anywhere.
+    *   **Docker Compose**: Automatically connects to the internal `db` container (Zero config).
+    *   **Custom / Remote**: Can connect to *any* PostgreSQL instance (Localhost, Render, AWS) just by changing the variable in the local .env file (or environment variables).
+
+### 5. **Quality Gate (CI/CD)**
+**Decision:** I built a GitHub Actions pipeline that runs on every push.
+*   **Why?** Humans forget. Machines don't.
+*   **The Check**: Before any code is accepted, it must pass 1) Linting (Ruff) and 2) Tests (Pytest). This guarantees the "Main" branch is always clean and deployable.
+
+---
+
+## Challenge Requirements & Engineering Decisions
+
+I designed the system to specifically address the constraints mentioned in the challenge description:
+
+### **Requirement: "Extensive collection of seashells"**
+*   **Design Consideration**: An "extensive" list can mean thousands or millions of records. Loading them all at once would crash the frontend or slow the DB.
+*   **Solution**: **Offset Pagination**.
+    *   The API defaults to 10 items per page (`limit=10`).
+    *   This ensures the app remains fast whether James has 50 shells or 50,000.
+
+### **Requirement: "Add a new seashell (Name, Species, Description, etc.)"**
+*   **Design Consideration**: The "etc." implies that data requirements might change (e.g., adding `location_found` or `size` later).
+*   **Solution**: **Alembic Migrations**.
+    *   I did not just create a static database script.
+    *   I set up `Alembic` so we can easy add new columns (`alembic revision`) without deleting the database. The schema is evolvable.
+
+### **Requirement: "Hard time tracking the seashells"**
+*   **Design Consideration**: "Hard time tracking" implies data is precious. Accidental deletion would be a disaster.
+*   **Solution**: **Soft Deletes**.
+    *   When James hits "Delete", the record isn't removed. We just set `deleted=true`.
+    *   The API automatically filters these out, but the data remains in Postgres if we ever need to recover it.
+
+### **Requirement: "Persist data using a database of your choice"**
+*   **Design Consideration**: We need something reliable for structured data.
+*   **Solution**: **PostgreSQL** (vs. SQLite).
+    *   SQLite is fine for a toy app, but Postgres is the industry standard for production.
+    *   It supports concurrent writes (James and Anna editing at the same time) and strong data integrity.
+
+### **Requirement: "Easy to consume API documentation"**
+*   **Design Consideration**: The frontend developer needs to know exactly what JSON to send.
+*   **Solution**: **Swagger UI & ReDoc**.
+    *   I didn't just write a README.
+    *   The API auto-generates interactive docs at `/docs`. You can test endpoints directly in the browser - no guessing required.
 
 ---
 
-## Architecture Overview
 
-### Layered Design
 
-```
-API Layer (app/api/)         - Routes, HTTP handling
-Service Layer (app/services/) - Business logic
-Model Layer (app/models/)     - Database ORM
-```
 
----
 
-## Database Schema
 
-```sql
-CREATE TABLE seashell (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR NOT NULL,
-    species VARCHAR NOT NULL,
-    description VARCHAR,
-    deleted BOOLEAN NOT NULL DEFAULT FALSE,
-    created_at TIMESTAMP NOT NULL DEFAULT NOW()
-);
-```
-
-### Migrations
-
-```bash
-# View current status
-alembic current
-
-# Apply migrations
-alembic upgrade head
-
-# Create new migration
-alembic revision --autogenerate -m "Description"
-```
-
----
 
 ## Logging & Monitoring
 

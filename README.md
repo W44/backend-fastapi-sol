@@ -4,16 +4,19 @@ A RESTful backend service for managing seashell collections with persistent stor
 
 ![CI Status](https://github.com/W44/backend-fastapi-sol/actions/workflows/test.yml/badge.svg)
 
-**Features:**
-- CRUD operations for seashell records
-- Pagination, search, and sorting
-- PostgreSQL database persistence
-- Auto-generated API documentation (Swagger UI)
-- Soft delete pattern
-- **Production-Ready**: Multi-stage Docker builds, PostgreSQL persistence
-- **Code Quality**: Automated Linting (Ruff) in CI pipeliness design
+## Overview
 
----
+A production-ready REST API for managing seashell collections.
+
+> [!IMPORTANT]
+> ## Technical Details
+>
+> See [**TECHNICAL.md**](TECHNICAL.md) for **Architecture**, **Schema**, and **Design Decisions**.
+
+**Key Capabilities:**
+- **Full CRUD**: Create, Read, Update, Delete (Soft)
+- **Advanced Querying**: Pagination, Search, and Sorting
+- **Robustness**: PostgreSQL persistence & Dockerized deployment
 
 ## For Frontend Developers
 
@@ -63,7 +66,7 @@ Content-Type: application/json
 #### 2. List Seashells
 
 ```http
-GET /seashells?page=1&page_size=10&sort_by=name&order=asc&name=conch
+GET /seashells?page=1&page_size=10&sort_by=name&order=asc&search=conch
 ```
 
 **Query Parameters:**
@@ -74,8 +77,7 @@ GET /seashells?page=1&page_size=10&sort_by=name&order=asc&name=conch
 | `page_size` | integer | 10 | Items per page (max 100) |
 | `sort_by` | string | id | Sort field: `id`, `name`, `species`, `description` |
 | `order` | string | asc | `asc` or `desc` |
-| `name` | string | - | Search by name (case-insensitive) |
-| `species` | string | - | Filter by species (case-insensitive) |
+| `search` | string | - | Search across name, species, and description (case-insensitive) |
 
 **Response:** `200 OK`
 
@@ -222,12 +224,11 @@ uvicorn app.main:app --reload
 
 ## For Backend Developers
 
-See [TECHNICAL.md](TECHNICAL.md) for:
-- Architecture details
-- Database schema & migrations
-- Logging & monitoring
-- Docker deployment
-- Testing
+See [TECHNICAL.md](TECHNICAL.md) for deeper engineering details:
+- **System Architecture & Decisions** (Why I built it this way)
+- **Database Schema & Migrations**
+- **Docker Deployment Strategy**
+- **CI/CD Pipeline Explanation**
 
 ---
 
