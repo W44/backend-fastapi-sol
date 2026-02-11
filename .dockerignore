@@ -31,9 +31,5 @@ CHALLENGE.md
 # Environment
 .env
 
-# Alembic (migrations run separately)
-alembic.ini
-alembic/
-
 # Others
 .DS_Store
